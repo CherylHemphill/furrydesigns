@@ -2,6 +2,8 @@ const { PubSub, withFilter } = require("graphql-subscriptions")
 const {  User, Product, Review, Task, Message, Order } = require('../models');
 const { AuthenticationError } = require('apollo-server-express');
 const { protect, isAdmin } = require('../utils/helpers');
+const { generateToken } = require('../utils/auth');
+const stripe = require('stripe')('sk_test_4eC39HqLyjWDarjtT1zdp7dc');
 
 const pubsub = new PubSub();
 const MESSAGE_CREATED = 'MESSAGE_CREATED';
@@ -84,6 +86,38 @@ const resolvers = {
       
     },
 
+    checkout: async (parent, args, context) => {
+      const url = new URL(context.headers.referer).origin;
+      await new Order({ products: args.products });
+     
+      const line_items = [];
+      for (const product of args.products) {
+        line_items.push({
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: product.name,
+              description: product.description,
+              images: [`${url}/images/${product.image}`]
+            },
+            unit_amount: product.price * 100,
+          },
+          quantity: product.purchaseQuantity,
+        });
+      }
+
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items,
+        mode: 'payment',
+        success_url: `${url}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${url}/`,
+      });
+
+      return { session: session.id };
+    },
+
+
     getAllMessages: async (_, args, context) => {
       protect(context);
       isAdmin(context);
@@ -109,12 +143,10 @@ const resolvers = {
     
     },
 
-    tasks: async (_, __, context) => {
-      protect(context);
-      isAdmin(context);
-      const adminId = context.user.id;
-      return await Task.find({ admin: adminId });
+    tasks: async () => {
+      return await Task.find();
     },
+    
     
 
   },
@@ -153,11 +185,8 @@ const resolvers = {
       return { token, user };
     },
 
-    async logout(_, __, { res }) {
-      res.cookie('jwt', '', {
-        httpOnly: true,
-        expires: new Date(0)
-      });
+    async logout(_, __, context) {
+    
       return true;
     },
 
@@ -177,6 +206,19 @@ const resolvers = {
         return User.findOneAndDelete({ _id: context.user._id });
       }
       throw new AuthenticationError('You need to be logged in!');
+    },
+
+    addAdmin: async (_, { userId }) => {
+      try {
+        const user = await User.findByIdAndUpdate(userId, {isAdmin: true }, { new: true });
+        if (!user) {
+          throw new Error('User not found');
+        }
+        return user;
+      }  catch (error) {
+        console.log('Error adding user to admin');
+        throw new Error(`Unable to add user to admin: ${error.message}`);
+      }
     },
 
     createProduct: async (_, { name, animalType, size, color, description, model, price }, context) => {
@@ -313,104 +355,4 @@ const resolvers = {
 module.exports = resolvers;
 
 
- // if (!context.user) {
-      //   throw new AuthenticationError('You need to be logged in!');
-      // }
-      // return User.find();
-
-       // if (!context.user) {
-      //   throw new AuthenticationError('You need to be logged in!');
-      // }
-      // const user = await User.findOne({ _id: context.user._id });
-      // return user.isAdmin;
-
-// if (!context.user) {
-      //   throw new AuthenticationError('You need to be logged in!');
-      // }
-      // return User.findOne({ _id: userId });
-
- // if (context.user) {
-      //   return User.findOne({ _id: context.user._id });
-      // }
-      // throw new AuthenticationError('You need to be logged in!');
-
-      // try {
-      //   return Product.findOne({ _id });
-      // } catch (error) {
-      //   console.error("Error retrieving product:", error);
-      //   throw new Error("Unable to fetch the product");
-      // }
-
-       //   return Product.find();
-    // },
-    // orderById: async (parent, { _id }) => {
-    //   try {
-    //     return Order.findOne({_id});
-    //   } catch (error) {
-    //     console.error("Error retrieving order:", error);
-    //     throw new Error("Unable to fetch the order");
-    //   }
-
-
-      // if (!context.user) {
-      //   throw new AuthenticationError("You must be logged in to view orders.");
-      // }
-    
-      // try {
-      //   if (context.user.isAdmin) {
-      //     return Order.find({});
-      //   }
-      //   return Order.find({ userId: context.user._id }); 
-      // } catch (error) {
-      //   console.error("Error retrieving orders:", error);
-      //   throw new Error("Unable to fetch orders");
-      // }
-
-// if (!context.user) {
-      //   throw new AuthenticationError("You must be logged in to view messages.");
-      // }
-      // try {
-      //   if (context.user.isAdmin) {
-      //     return Message.find({});
-      //   }
-      //   return Message.find({ userId: context.user._id });
-      // } catch (error) {
-      //   console.error("Error retrieving messages:", error);
-      //   throw new Error("Unable to fetch messages");
-      // }
-
-      // try {
-      //   return Review.findOne({_id});
-      // } catch (error) {
-      //   console.error("Error retrieving review:", error);
-      //   throw new Error("Unable to fetch the review");
-      // }
-
-      // const { name, email, password } = input;
-      // Check if the email already exists
-
- // if (!context.user || !context.user.isAdmin) {
-      //   throw new AuthenticationError('You need to be an admin to create a product!');
-      // }
-      // const product = await Product.create(productdata);
-      // return product;
-
-  // if (!context.user || !context.user.isAdmin) {
-      //   throw new AuthenticationError('You need to be an admin to edit a product!');
-      // }
-      // const product = await Product.findOneAndUpdate({ _id: productdata._id }, productdata, { new: true });
-      // return product;
-
- // if (!context.user) {
-      //   throw new AuthenticationError('You must be logged in to place an order.');
-      // }
-    
-      // const newOrder = new Order({
-      //   userId: context.user._id,
-      //   invoiceAmount: input.invoiceAmount,
-      //   status: input.status,
-      //   products: input.products.map(p => ({ product: p.productId, quantity: p.quantity }))
-      // });
-    
-      // return await newOrder.save();
-
+ 

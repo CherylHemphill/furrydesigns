@@ -1,49 +1,38 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { useRegisterMutation } from '../../../slices/userApiSlice'
-import { setCredentials } from '../../../slices/authSlice';
-import { toast } from 'react-toastify';
+import { useMutation } from '@apollo/client';
+import auth from '../../../utils/auth';
+import { ADD_USER } from '../../../utils/mutations';
+
+// import { toast } from 'react-toastify';
 import BannerIcons from '../Products/Layout/BannerIcons';
 
-const RegisterScreen = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    const [register, { isLoading }] = useRegisterMutation();
-
-    //const userInfo  = useSelector(state => state.auth.userInfo);
-
-    const { search } = useLocation();
-    const sp = new URLSearchParams(search);
-    const redirect = sp.get('redirect') || '/login';
-
-    // useEffect(() => {
-    //     if (userInfo) {
-    //         navigate(redirect);
-    //     }
-    // }, [navigate, redirect, userInfo]);
-
-    const submitHandler = async (e) => {
-        e.preventDefault();
-        if (password !== confirmPassword) {
-            toast.error('Passwords do not match');
-            return;
-        } else {
-            try {
-                const res = await register({ name, email, password }).unwrap();
-                dispatch(setCredentials({ ...res }));
-                navigate(redirect);
-            } catch (err) {
-                toast.error(err?.data?.message || err.data.error);
-            }
-        }
+function RegisterScreen(props) {
+    const [formState, setFormState] = useState({ email: '', password: '' });
+    const [addUser] = useMutation(ADD_USER);
+  
+    const submitHandler = async (event) => {
+      event.preventDefault();
+      const mutationResponse = await addUser({
+        variables: {
+          email: formState.email,
+          password: formState.password,
+          name: formState.name,
+        },
+      });
+      const token = mutationResponse.data.addUser.token;
+      auth.login(token);
     };
+  
+    const handleChange = (event) => {
+      const { name, value } = event.target;
+      setFormState({
+        ...formState,
+        [name]: value,
+      });
+    };
+
+
 
     return (
         <div>
@@ -63,8 +52,8 @@ const RegisterScreen = () => {
                             id="name"
                             className="mt-1 p-2 block w-full rounded-md border border-gray-300 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Enter name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            // value={name}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="my-3">
@@ -76,8 +65,8 @@ const RegisterScreen = () => {
                             id="email"
                             className="mt-1 p-2 block w-full rounded-md border border-gray-300 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Enter email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            // value={email}
+                            onChange={handleChange}
                         />
                     </div>
                     <div className="my-3">
@@ -89,11 +78,11 @@ const RegisterScreen = () => {
                             id="password"
                             className="mt-1 p-2 block w-full rounded-md border border-gray-300 focus:ring focus:ring-indigo-500 focus:border-indigo-500"
                             placeholder="Enter password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            // value={password}
+                            onChange={handleChange}
                         />
                     </div>
-                    <div className="my-3">
+                    {/* <div className="my-3">
                         <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                             Confirm Password
                         </label>
@@ -105,7 +94,7 @@ const RegisterScreen = () => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                         />
-                    </div>
+                    </div> */}
                     <button
                         type="submit"
                         className="mt-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-500 focus:ring-offset-2"
@@ -117,7 +106,7 @@ const RegisterScreen = () => {
                     <p>
                         Already have an account?{' '}
                         <Link
-                            to={redirect ? `/login?redirect=${redirect}` : '/login'}
+                            to="/login"
                             className="font-medium text-blue-600 hover:text-blue-500"
                         >
                             Login
@@ -132,3 +121,48 @@ const RegisterScreen = () => {
 
 export default RegisterScreen;
 
+// import { useDispatch, useSelector } from 'react-redux';
+// import { useRegisterMutation } from '../../../slices/userApiSlice'
+// import { setCredentials } from '../../../slices/authSlice';
+
+ //const userInfo  = useSelector(state => state.auth.userInfo);
+
+  // useEffect(() => {
+    //     if (userInfo) {
+    //         navigate(redirect);
+    //     }
+    // }, [navigate, redirect, userInfo]);
+    // const RegisterScreen = () => {
+//     const [name, setName] = useState('');
+//     const [email, setEmail] = useState('');
+//     const [password, setPassword] = useState('');
+//     const [confirmPassword, setConfirmPassword] = useState('');
+
+//     const dispatch = useDispatch();
+//     const navigate = useNavigate();
+
+//     const [register, { isLoading }] = useRegisterMutation();
+
+   
+
+//     const { search } = useLocation();
+//     const sp = new URLSearchParams(search);
+//     const redirect = sp.get('redirect') || '/login';
+
+   
+
+//     const submitHandler = async (e) => {
+//         e.preventDefault();
+//         if (password !== confirmPassword) {
+//             toast.error('Passwords do not match');
+//             return;
+//         } else {
+//             try {
+//                 const res = await register({ name, email, password }).unwrap();
+//                 dispatch(setCredentials({ ...res }));
+//                 navigate(redirect);
+//             } catch (err) {
+//                 toast.error(err?.data?.message || err.data.error);
+//             }
+//         }
+//     };

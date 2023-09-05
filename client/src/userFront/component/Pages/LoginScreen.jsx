@@ -1,45 +1,37 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { useMutation } from '@apollo/client';
+import { Link } from 'react-router-dom';
+import { LOGIN } from '../../../utils/mutations';
+import auth from '../../../utils/auth';
 
-import { useDispatch, useSelector } from 'react-redux'
-
-import { useLoginMutation } from '../../../slices/userApiSlice';
-import { setCredentials } from '../../../slices/authSlice'
-import { toast } from 'react-toastify';
+// import { toast } from 'react-toastify';
 import BannerIcons from '../Products/Layout/BannerIcons';
 
-
-const LoginScreen = () => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('');
-    
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    const [login] = useLoginMutation();
-
-    //const { userInfo } = useSelector(state => state.auth);
-
-    const { search } = useLocation();
-    const sp = new URLSearchParams(search);
-    const redirect = sp.get('redirect') || '/Shop';
-
-    // useEffect(() => { 
-    //     if(userInfo){
-    //         navigate(redirect);
-    //     }
-    // }, [navigate, redirect, userInfo]);
-
-    const submitHandler = async (e) =>{
-        e.preventDefault()
-        try {
-            const res = await login({email, password}).unwrap();
-            dispatch(setCredentials({...res}));
-            navigate(redirect);
-        } catch (err) {
-            toast.error(err?.data?.message || err.data.error);
-        }
+function LoginScreen(props) {
+    const [formState, setFormState] = useState({ email: '', password: '' });
+    const [login, { error }] = useMutation(LOGIN);
+  
+    const submitHandler = async (event) => {
+      event.preventDefault();
+      try {
+        const mutationResponse = await login({
+          variables: { email: formState.email, password: formState.password },
+        });
+        const token = mutationResponse.data.login.token;
+        auth.login(token);
+      } catch (e) {
+        console.log(e);
+      }
     };
+  
+    const handleChange = (event) => {
+      const { name, value } = event.target;
+      setFormState({
+        ...formState,
+        [name]: value,
+      });
+    };
+
 
     return (
        <div>
@@ -57,10 +49,11 @@ const LoginScreen = () => {
                         <input
                             type="email"
                             id="email"
+                            name="email"
                             className="w-full px-3 py-2 border rounded"
                             placeholder="Enter email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            // value={email}
+                            onChange={handleChange}
                         />
                     </div>
 
@@ -71,10 +64,11 @@ const LoginScreen = () => {
                         <input
                             type="password"
                             id="password"
+                            name="password"
                             className="w-full px-3 py-2 border rounded"
                             placeholder="Enter password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            // value={password}
+                            onChange={handleChange}
                         />
                     </div>
 
@@ -101,3 +95,44 @@ const LoginScreen = () => {
 };
 
 export default LoginScreen;
+
+
+// import { Link, useLocation, useNavigate } from 'react-router-dom'
+
+// import { useDispatch, useSelector } from 'react-redux'
+
+// import { useLoginMutation } from '../../../slices/userApiSlice';
+// import { setCredentials } from '../../../slices/authSlice'
+
+
+// const LoginScreen = () => {
+//     const [email, setEmail] = useState('')
+//     const [password, setPassword] = useState('');
+    
+//     const dispatch = useDispatch();
+//     const navigate = useNavigate();
+
+//     const [login] = useLoginMutation();
+
+//     //const { userInfo } = useSelector(state => state.auth);
+
+//     const { search } = useLocation();
+//     const sp = new URLSearchParams(search);
+//     const redirect = sp.get('redirect') || '/Shop';
+
+//     // useEffect(() => { 
+//     //     if(userInfo){
+//     //         navigate(redirect);
+//     //     }
+//     // }, [navigate, redirect, userInfo]);
+
+//     const submitHandler = async (e) =>{
+//         e.preventDefault()
+//         try {
+//             const res = await login({email, password}).unwrap();
+//             dispatch(setCredentials({...res}));
+//             navigate(redirect);
+//         } catch (err) {
+//             toast.error(err?.data?.message || err.data.error);
+//         }
+//     };
