@@ -1,5 +1,38 @@
 import React, { useState } from "react";
 
+
+// import React from 'react';
+// import { useMutation } from '@apollo/client';
+// import { ADD_ADMIN } from './addAdminMutation'; // Update the path to your addAdminMutation file
+
+// function UserAdminButton({ userId }) {
+//   const [addAdmin] = useMutation(ADD_ADMIN);
+
+//   const handleAddAdmin = async () => {
+//     try {
+//       const { data } = await addAdmin({
+//         variables: {
+//           userId: userId
+//         }
+//       });
+
+//       console.log('User promoted to admin:', data.promoteUserToAdmin);
+//       // You can handle UI updates or notifications here
+//     } catch (error) {
+//       console.error('Error promoting user to admin:', error);
+//       // Handle error cases here
+//     }
+//   };
+
+//   return (
+//     <button onClick={handleAddAdmin}>Promote to Admin</button>
+//   );
+// }
+
+// export default UserAdminButton;
+
+
+
 const mockUsers = [
     { id: 1, username: "johnDoe", email: "john@example.com", isAdmin: false },
     { id: 2, username: "janeDoe", email: "jane@example.com", isAdmin: true },

@@ -56,6 +56,17 @@ export const REMOVE_USER = gql`
   }
 `;
 
+export const ADD_ADMIN = gql`
+  mutation AddAdmin($userId: ID!) {
+    addAdmin(userId: $userId) {
+      _id
+      name
+      email
+      isAdmin
+    }
+  }
+`;
+
 export const CREATE_PRODUCT = gql`
 mutation CreateProduct(
     $name: String!,
