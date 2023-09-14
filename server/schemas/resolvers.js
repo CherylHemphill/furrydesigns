@@ -11,33 +11,41 @@ const MESSAGE_CREATED = 'MESSAGE_CREATED';
 
 const resolvers = {
   Query: {
-    getAllUsers: async (parent, args, context) => {
+    getAllUsers: async (_, args, context) => {
       protect(context);
       return User.find();
     
     },
     
-    isAdmin: async (parent, args, context) => {
+    isAdmin: async (_, args, context) => {
       protect(context);
-      isAdmin(context);
       const user = await User.findOne({ _id: context.user._id });
       return user.isAdmin;
       
     },
 
-    userById: async (parent, { userId }, context) => {
+
+    getUserProfile: async (_, args, context) => {
       protect(context);
-      return User.findOne({ _id: userId });
-     
+      const user = await User.findById(context.user._id).populate('orders');
+      user.orders.sort((a, b) => b.purchaseDate - a.purchaseDate);
+      return user;
     },
 
-    getUserProfile: async (parent, args, context) => {
-      protect(context);
-      return User.findOne({ _id: context.user._id });
-      
+ getAllProducts: async () => {
+      try {
+        const products = await Product.find();
+        if (!products) {
+          throw new Error('No Products found');
+        } 
+        return products;
+      } catch (error) {
+        console.error("Error retrieving products:", error);
+        throw new Error(`Unable to fetch the products: ${error.message}`);
+      }
     },
 
-    productById: async (parent, { _id }) => {
+    productById: async (_, { _id }) => {
       try {
         const product = await Product.findOne({ _id });
         if (!product) {
@@ -51,20 +59,30 @@ const resolvers = {
      
     },
 
-    getAllProducts: async () => {
-      try {
-        const products = await Product.find();
-        if (!products) {
-          throw new Error('No Products found');
-        } 
-        return products;
-      } catch (error) {
-        console.error("Error retrieving products:", error);
-        throw new Error(`Unable to fetch the products: ${error.message}`);
+    products: async (_, { name }) => {
+      const params = {};
+
+      if (name) {
+        params.name = {
+          $regex: name
+        };
       }
+
+      return await Product.find(params);
     },
 
-    getOrdersByUser: async (_, { userId }) => {
+   getAllOrders: async (_, args, context) => {
+      protect(context);
+      return Order.find({});
+      
+    },
+
+     order: async (_, { _id }, context) => {
+    protect(context);
+    return Order.findById(_id);
+  },
+
+    getOrdersByUser: async (_, { userId }, context) => {
       try {
         protect(context);
         const orders = await Order.find({ userId }); 
@@ -74,19 +92,7 @@ const resolvers = {
       }
   },
 
-  orderById: async (_, { _id }) => {
-    protect(context);
-    return Order.findById(_id);
-  },
-
-    getAllOrders: async (_, args, context) => {
-      protect(context);
-      isAdmin(context);
-      return Order.find({});
-      
-    },
-
-    checkout: async (parent, args, context) => {
+    checkout: async (_, args, context) => {
       const url = new URL(context.headers.referer).origin;
       await new Order({ products: args.products });
      
@@ -120,7 +126,6 @@ const resolvers = {
 
     getAllMessages: async (_, args, context) => {
       protect(context);
-      isAdmin(context);
       return Message.find({});
      
     },
@@ -129,9 +134,9 @@ const resolvers = {
       return Review.find();
     },
   
-    reviewById: async (parent, { _id }) => {
+    reviewById: async (_, { _id }) => {
       try {
-        const review = await Review.findOne({_id});
+        const review = await Review.findById(_id);
         if (!review) {
           throw new Error('Review not found')
         }
@@ -154,7 +159,7 @@ const resolvers = {
 
 
   Mutation: {
-    addUser: async (parent, { name, email, password }) => {
+    addUser: async (_, { name, email, password }) => {
     
       const existingUser = await User.findOne({ email });
   
@@ -168,7 +173,7 @@ const resolvers = {
       return { token, user };
   },
 
-    login: async (parent, { email, password }) => {
+    login: async (_, { email, password }) => {
       const user = await User.findOne({ email });
 
       if (!user) {
@@ -194,14 +199,14 @@ const resolvers = {
         protect(context);
   
         const user = await User.findOneAndUpdate(
-          { _id: id },
+          { _id: context.user._id },
           { name, email, password, isAdmin },
           { new: true }
         );
         return user;
     },
 
-    removeUser: async (parent, args, context) => {
+    removeUser: async (_, args, context) => {
       if (context.user) {
         return User.findOneAndDelete({ _id: context.user._id });
       }
@@ -223,7 +228,6 @@ const resolvers = {
 
     createProduct: async (_, { name, animalType, size, color, description, model, price }, context) => {
       protect(context);
-      isAdmin(context);
       const product = await Product.create({ name, animalType, size, color, description, model, price });
       return product;
      
@@ -231,7 +235,6 @@ const resolvers = {
 
     editProduct: async (_, { id, name, animalType, size, color, description, model, price }, context) => {
       protect(context);
-      isAdmin(context);
       const product = await Product.findOneAndUpdate(
         { _id: id },
         { name, animalType, size, color, description, model, price },
@@ -241,44 +244,42 @@ const resolvers = {
      
     },
 
-    addOrder: async (_, { invoiceAmount, status, products }, context) => {
-      protect(context);
-      const newOrder = new Order({
-        userId: context.user._id,
-        invoiceAmount,
-        status,
-        products: products.map(p => ({ product: p.productId, quantity: p.quantity }))
-      });
-      return await newOrder.save();
-      
-    },
-    
-    addMessage: async (_, { userId, subject, content, date }, context) => {
-      const message = new Message({ userId, subject, content, date });
-      await message.save();
-      pubsub.publish(MESSAGE_CREATED, { messageCreated: message });
-      return message;
-    },
+    addOrder: async (_, { products }, context) => {
+      console.log(context);
+      if (context.user) {
+        const newOrder = new Order({ products });
 
-    replyToMessage: async (parent, { messageId, content, date }, context) => {
-    
-      const message = await Message.findById(messageId);
-      if (!message) {
-        throw new Error('Message not found');
+        await User.findByIdAndUpdate(context.user._id, { $push: { orders: newOrder } });
+
+        return newOrder;
       }
-    
-      const reply = {
-        adminId: context.user._id,
-        content: content,
-        date: date || Date.now()  
-      };
-    
-      message.messageReply.push(reply);
-      await message.save()
-      return message;
-    },
 
-    createReviewReply: async (parent, { reviewId, text }, context) => {
+      throw new AuthenticationError('Not logged in');
+    },
+    
+    adminUpdateOrderStatus: async (_, { orderId, status }) => {
+      try {
+        if (status !== "shipped") {
+          throw new Error("Invalid status. Only 'shipped' status is allowed.");
+        }
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+          throw new Error("Order not found.");
+        }
+        if (order.status !== "pending") {
+          throw new Error("Order status is not 'pending', so it cannot be updated.");
+        }
+        order.status = status;
+        await order.save();
+        return order;
+      } catch (error) {
+        throw new Error(`Failed to update order status: ${error.message}`);
+      }
+    }, 
+  
+
+    createReviewReply: async (_, { reviewId, text }, context) => {
       const review = await Review.findById(reviewId);
       if (!review) {
         throw new Error('Review not found');
@@ -294,7 +295,7 @@ const resolvers = {
       return review;
     },
 
-    updateReviewReply: async (parent, { id, text }, context) => {
+    updateReviewReply: async (_, { id, text }, context) => {
       const updatedReview = await Review.findOneAndUpdate(
         { "replies._id": id }, 
         { "$set": { "replies.$.text": text } },
@@ -306,7 +307,7 @@ const resolvers = {
       return updatedReview;
     },
 
-    deleteReviewReply: async (parent, { id }, context) => {
+    deleteReviewReply: async (_, { id }, context) => {
       const updatedReview = await Review.findOneAndUpdate(
         {}, 
         { "$pull": { "replies": { "_id": id } } },
@@ -335,6 +336,30 @@ const resolvers = {
       task.completed = !task.completed;
       await task.save();
       return task;
+    },
+addMessage: async (_, { userId, subject, content, date }, context) => {
+      const message = new Message({ userId, subject, content, date });
+      await message.save();
+      pubsub.publish(MESSAGE_CREATED, { messageCreated: message });
+      return message;
+    },
+
+    replyToMessage: async (_, { messageId, content, date }, context) => {
+    
+      const message = await Message.findById(messageId);
+      if (!message) {
+        throw new Error('Message not found');
+      }
+    
+      const reply = {
+        adminId: context.user._id,
+        content: content,
+        date: date || Date.now()  
+      };
+    
+      message.messageReply.push(reply);
+      await message.save()
+      return message;
     },
 
   },

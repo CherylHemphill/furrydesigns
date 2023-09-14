@@ -37,7 +37,7 @@ function About() {
           Welcome to Furry Feet Friends! We're thrilled to have you here.
         </p>
         <p style={styles.paragraph}>
-          Since our inception in 2003, we've been on a unique journey. Our company took root at the UT coding bootcamp, where we developed an innovative Ecommerce platform with a primary focus on showcasing products in a 3D perspective.
+          Since our inception in 2023, we've been on a unique journey. Our company took root at the UT coding bootcamp, where we developed an innovative Ecommerce platform with a primary focus on showcasing products in a 3D perspective.
         </p>
         <p style={styles.paragraph}>
           Our core beliefs revolve around community, trust, and unmatched value. These tenets guide us as we continue to serve and evolve.

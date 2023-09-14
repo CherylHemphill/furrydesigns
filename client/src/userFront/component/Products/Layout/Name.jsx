@@ -8,7 +8,7 @@ function Name() {
         fontSize: '5rem',
         fontWeight: '900',
         textAlign: 'center',
-        color: '#5271FF',
+        color: 'rgb(42, 157, 143)',
         marginTop: '-5rem',
     }
 

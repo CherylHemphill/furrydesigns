@@ -17,7 +17,7 @@ function CheckoutBtn() {
   return (
     <Stack direction="row" spacing={2}>
       <div style={shadow} >
-      <Button variant="outlined" startIcon={<ShoppingCartIcon />}>
+      <Button variant="outlined" className='text-darkBlue' startIcon={<ShoppingCartIcon />}>
         ADD TO CART
       </Button>
       </div>

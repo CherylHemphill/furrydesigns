@@ -1,9 +1,6 @@
 import { gql } from '@apollo/client';
 
 
-
-
-
 export const GET_ALL_CUSTOMERS = gql`
   query GetAllCustomers {
     getAllUsers {
@@ -14,44 +11,36 @@ export const GET_ALL_CUSTOMERS = gql`
   }
 `;
 
-export const ADMIN_GET_ALL_ORDERS = gql`
-  query AdminGetAllOrders {
-    getAllOrders {
-      _id
-      products {
-        product {
-          name
-          price
-        }
-      }
-      date
-      status
-      invoiceAmount
-    }
-  }
-`;
-
-export const GET_USER_BY_ID = gql`
-  query GetUserById($id: ID!) {
-    userById(userId: $id) {
-      _id
-      name
-      email
-      isAdmin
-    }
-  }
-`;
-
 export const PROFILE_QUERY = gql`
   query Profile($uid: ID!) {
     getUserProfile(userId: $id) {
       _id
       name
       email
+      orders {
+        _id
+        purchaseDate
+        status
+        products {
+          _id
+          name
+          size
+          color
+          description
+        }
+      }
     }
   }
 `;
 
+export const GET_ALL_PRODUCT_IDS = gql`
+query GetAllProductIds {
+  getAllProducts {
+    _id
+    name
+  }
+}
+`;
 
 export const GET_PRODUCT_DETAILS = gql`
 query GetProduct($id: ID!) {
@@ -76,13 +65,58 @@ query GetProduct($id: ID!) {
 }
 `;
 
-export const GET_ALL_PRODUCT_IDS = gql`
-query GetAllProductIds {
-  getAllProducts {
-    _id
-    name
+export const QUERY_PRODUCTS = gql`
+  query getProducts($category: ID) {
+    products(category: $category) {
+      _id
+      name
+      description
+      price
+      quantity
+      image
+      category {
+        _id
+      }
+    }
   }
-}
+`;
+
+
+export const ADMIN_GET_ALL_ORDERS = gql`
+  query AdminGetAllOrders {
+    getAllOrders {
+      _id
+      products {
+        product {
+          name
+          price
+        }
+      }
+      date
+      status
+      invoiceAmount
+    }
+  }
+`;
+
+export const GET_ORDER = gql`
+  query GetOrder($orderId: ID!) {
+    order(orderId: $orderId) {
+      _id
+      purchaseDate
+      status
+      product {
+        _id
+    animalType
+    colors
+    description
+    model
+    name
+    price
+    sizes
+      }
+    }
+  }
 `;
 
 export const GET_ORDERS_BY_USER = gql`
@@ -98,52 +132,10 @@ export const GET_ORDERS_BY_USER = gql`
   }
 `;
 
-export const GET_ORDER_BY_ID = gql`
-  query GetOrderById($id: ID!) {
-    orderById(_id: $id) {
-      _id
-      userId
-      invoiceAmount
-      status
-      date
-      products {
-        product {
-          _id
-          name
-          animalType
-          sizes
-          colors
-          description
-          model
-          price
-        }
-        quantity
-      }
-    }
-  }
-`;
-
-export const GET_ALL_ORDERS = gql`
-  query GetAllOrders {
-    getAllOrders {
-      _id
-      userId
-      invoiceAmount
-      status
-      date
-      products {
-        product {
-          _id
-          name
-          animalType
-          sizes
-          colors
-          description
-          model
-          price
-        }
-        quantity
-      }
+export const QUERY_CHECKOUT = gql`
+  query getCheckout($products: [ProductInput]) {
+    checkout(products: $products) {
+      session
     }
   }
 `;
@@ -181,6 +173,20 @@ query GetAllReviews {
 }
 `;
 
+export const GET_SINGLE_REVIEW = gql`
+query GetSingleReview($reviewId: ID!) {
+  reviewById(reviewId: $reviewId) {
+    _id
+    user {
+        name
+      }
+    rating
+    text
+    date
+  }
+}
+`;
+
 export const GET_TASKS = gql`
 query GetTasks {
   tasks {
@@ -190,15 +196,5 @@ query GetTasks {
   }
 }
 `;
-
-
-
-
-
-
-
-
-
-
 
 

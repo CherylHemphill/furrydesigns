@@ -11,7 +11,6 @@ function Home() {
     fontSize: '8rem',
     fontWeight: '900',
     textAlign: 'center',
-    color: '#5271FF',
     lineHeight: '8rem',
   }
 
@@ -28,19 +27,19 @@ function Home() {
     <div>
       <BannerIcons />
     <div style={centerStyle}>
-      <div id='furff' style={NameMain}>Furry Feet 
+      <div id='furff' style={NameMain} className='text-teal'>Furry Feet 
       < br/>Friends</div>
       <Stack direction="row" spacing={2}>
-        <Link to="/about">
-        <Button variant="outlined">
+        <Link to="/about" >
+        <Button variant="outlined" className='text-darkBlue'>
           About Us
         </Button>
         </Link>
-        {/* <Link to="/Shop">
+        <Link to="/Shop">
         <Button variant="outlined">
           Shop
         </Button>
-        </Link> */}
+        </Link>
       </Stack>
     </div>
     </div>

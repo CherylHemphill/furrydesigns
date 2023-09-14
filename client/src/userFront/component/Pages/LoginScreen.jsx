@@ -37,9 +37,9 @@ function LoginScreen(props) {
        <div>
               <BannerIcons />
        
-        <div className="flex items-center justify-center h-screen bg-rgb(238, 218, 171)">
-            <div className="w-full max-w-md p-6 bg-white rounded shadow-md">
-                <h1 className="text-2xl font-bold mb-4">Sign In</h1>
+        <div className="flex items-center justify-center h-screen bg-body">
+            <div className="w-full max-w-md p-6 bg-offWhite rounded shadow-md">
+                <h1 className="text-2xl font-bold mb-4 ">Sign In</h1>
 
                 <form onSubmit={submitHandler}>
                     <div className="mb-4">
@@ -74,7 +74,7 @@ function LoginScreen(props) {
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 text-white py-2 rounded"
+                        className="w-1/3 bg-darkBlue hover:bg-teal text-white py-2 rounded shadow-md"
                     >
                         Sign In
                     </button>
@@ -83,7 +83,7 @@ function LoginScreen(props) {
                 <div className="py-3">
                     <p className="text-sm">
                         New Customer?{' '}
-                        <Link to="/register" className="text-blue-500">
+                        <Link to="/register" className="text-burntOrange hover:text-teal">
                             Register
                         </Link>
                     </p>
