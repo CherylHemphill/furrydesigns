@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 const bcrypt = require('bcryptjs');
+const Order = require('./Order');
 
 
 const userSchema = new Schema({
@@ -24,6 +25,7 @@ const userSchema = new Schema({
         required: true,
         default: false,
     },
+    orders: [Order.schema]
 });
 
 

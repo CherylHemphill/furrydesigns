@@ -5,8 +5,8 @@ const typeDefs = gql`
     _id: ID
     name: String
     email: String
-    password: String
     isAdmin: Boolean
+    orders: [Order]
   }
 
   type Auth {
@@ -15,45 +15,43 @@ const typeDefs = gql`
   }
 
   type Product {
-    _id: ID!
-    name: String!
-    animalType: String!
-    sizes: [String!]!
-    colors: [String!]!
-    description: String!
+    _id: ID
+    name: String
+    animalType: String
+    sizes: [String]
+    colors: [String]
+    description: String
     model: String
-    price: Float!
+    price: Float
     reviews: [Review]
   }
 
   type Review {
-    _id: ID!
-    name: User!
-    rating: Float!
+    _id: ID
+    name: User
+    rating: Float
     text: String
-    date: String!
+    date: String
     ReviewReply: [ReviewReply]
   }
   
   type ReviewReply {
-    adminId: ID!
-    reviewId: ID!
-    text: String!
-    date: String!
+    adminId: ID
+    reviewId: ID
+    text: String
+    date: String
   }
 
   type Order {
-    _id: ID!
-    userId: ID!
-    invoiceAmount: Float!
-    status: String!
-    date: String!
-    products: [OrderedProduct]!
+    _id: ID
+    purchaseDate: String
+    status: String
+    products: [Product]
   }
   
   type OrderedProduct {
-    product: Product!
-    quantity: Int!
+    product: Product
+    quantity: Int
   }
 
   type Checkout {
@@ -61,24 +59,24 @@ const typeDefs = gql`
   }
 
   type Message {
-    _id: ID!
-    user: User!
-    subject: String!
-    content: String!
-    date: String!
+    _id: ID
+    user: User
+    subject: String
+    content: String
+    date: String
   }
 
   type MessageReply {
-    adminId: ID!
-    messageId: ID!
-    content: String!
-    date: String!
+    adminId: ID
+    messageId: ID
+    content: String
+    date: String
   }
 
   type Task {
-    id: ID!
-    text: String!
-    completed: Boolean!
+    id: ID
+    text: String
+    completed: Boolean
   }
 
   input ProductInput {
@@ -91,22 +89,21 @@ const typeDefs = gql`
   }
 
   input OrderedProductInput {
-   productId: ID!
-   quantity: Int!
+   productId: ID
+   quantity: Int
  }
 
   type Query {
     getAllUsers: [User]
-    userById(userId: ID!): User
     getUserProfile: User
     isAdmin: Boolean
 
     getAllProducts: [Product]
     productById(_id: ID!): Product
+    products(name: String): [Product]
 
     getAllOrders: [Order]
-    orderById(_id: ID!): Order
-    adminGetAllOrders: [Order]
+    order(_id: ID!): Order
     getOrdersByUser(userId: ID!): [Order]
     checkout(products: [ProductInput]): Checkout
 
@@ -147,14 +144,8 @@ const typeDefs = gql`
     price: Float
   ): Product
   
-  addOrder(
-    invoiceAmount: Float!, 
-    status: String!, 
-    products: [OrderedProductInput!]
-  ): Order
-
-  addMessage(userId: ID!, subject: String!, content: String!): Message
-  replyToMessage(messageId: ID!, content: String!): MessageReply
+  addOrder(products: [ID]!): Order
+  adminUpdateOrderStatus(orderId: ID!, status: String!): Order
 
   createReviewReply(reviewId: ID!, text: String!): ReviewReply  
   updateReviewReply(id: ID!, text: String!): ReviewReply        
@@ -164,6 +155,8 @@ const typeDefs = gql`
   deleteTask(id: ID!): ID
   toggleTaskCompletion(id: ID!): Task
 
+ addMessage(userId: ID!, subject: String!, content: String!): Message
+  replyToMessage(messageId: ID!, content: String!): MessageReply
  
   }
   

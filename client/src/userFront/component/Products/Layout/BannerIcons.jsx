@@ -17,15 +17,15 @@ function BannerIcons() {
     }
 
     return (
-        <div style={{ ...iconPlacement, ...iconStyle }}>
+        <div style={{ ...iconPlacement, ...iconStyle }} >
              <Link to="/">
-            <HomeIcon style={iconStyle} />
+            <HomeIcon style={iconStyle}  className='text-smoke hover:text-dark'/>
             </Link>
             <Link to="/adminDashboard">
-                <AccountBoxIcon style={iconStyle} />
+                <AccountBoxIcon style={iconStyle} className='text-smoke hover:text-dark'/>
             </Link>
             <Link to="/Cart">
-            <ShoppingCartIcon style={iconStyle} />
+            <ShoppingCartIcon style={iconStyle} className='text-smoke hover:text-dark' />
             <CartCount />
             </Link>
             <Link to="/login">

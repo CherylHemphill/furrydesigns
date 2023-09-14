@@ -106,7 +106,7 @@ mutation UpdateProduct(
     $description: String,
     $model: String,
     $price: Float) {
-  updateProduct(
+      editProduct(
       id: $id,
       name: $name,
       animalType: $animalType,
@@ -128,25 +128,21 @@ mutation UpdateProduct(
 `;
 
 export const ADD_ORDER = gql`
-  mutation AddOrder($invoiceAmount: Float!, $status: String!, $products: [OrderedProductInput!]!) {
-    addOrder(invoiceAmount: $invoiceAmount, status: $status, products: $products) {
+  mutation AddOrder($products: [ID]!) {
+    addOrder(products: $products) {
       _id
-      userId
-      invoiceAmount
+      purchaseDate
       status
-      date
       products {
-        product {
-          _id
-          name
-          animalType
-          sizes
-          colors
-          description
-          model
-          price
-        }
-        quantity
+        _id
+        name
+        animalType
+        sizes
+        colors
+        description
+        model
+        price
+        
       }
     }
   }
@@ -161,44 +157,7 @@ export const ADMIN_UPDATE_ORDER_STATUS = gql`
   }
 `;
 
-export const NEW_MESSAGE_SUBSCRIPTION = gql`
-  subscription {
-    messageCreated {
-      _id
-      user {
-        name
-      }
-      subject
-      content
-      date
-    }
-  }
-`;
 
-export const ADD_MESSAGE = gql`
-  mutation AddMessage($userId: ID!, $subject: String!, $content: String!) {
-    addMessage(userId: $userId, subject: $subject, content: $content) {
-      _id
-      user {
-        name
-      }
-      subject
-      content
-      date
-    }
-  }
-`;
-
-export const REPLY_TO_MESSAGE = gql`
-  mutation ReplyToMessage($messageId: ID!, $content: String!) {
-    replyToMessage(messageId: $messageId, content: $content) {
-      adminId
-      messageId
-      text
-      date
-    }
-  }
-`;
 
 export const CREATE_REPLY = gql`
 mutation createReviewReply($reviewId: ID!, $text: String!) {
@@ -228,8 +187,6 @@ mutation deleteReviewReply($id: ID!) {
 }
 `;
 
-
-
 export const ADD_TASK = gql`
 mutation AddTask($text: String!) {
   addTask(text: $text) {
@@ -253,4 +210,43 @@ mutation toggleTaskCompletion($id: ID!) {
     completed
   }
 }
+`;
+
+export const ADD_MESSAGE = gql`
+  mutation AddMessage($userId: ID!, $subject: String!, $content: String!) {
+    addMessage(userId: $userId, subject: $subject, content: $content) {
+      _id
+      user {
+        name
+      }
+      subject
+      content
+      date
+    }
+  }
+`;
+
+export const REPLY_TO_MESSAGE = gql`
+  mutation ReplyToMessage($messageId: ID!, $content: String!) {
+    replyToMessage(messageId: $messageId, content: $content) {
+      adminId
+      messageId
+      text
+      date
+    }
+  }
+`;
+
+export const NEW_MESSAGE_SUBSCRIPTION = gql`
+  subscription {
+    messageCreated {
+      _id
+      user {
+        name
+      }
+      subject
+      content
+      date
+    }
+  }
 `;

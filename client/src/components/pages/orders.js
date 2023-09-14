@@ -66,7 +66,6 @@ function Orders () {
           <th>ID</th>
           <th>Name</th>
           <th>Email</th>
-          <th>Invoice Amount</th>
           <th>Status</th>
           <th>Date</th>
         </tr>
@@ -78,7 +77,6 @@ function Orders () {
             <td>{order.id}</td>
             <td>{order.name}</td>
             <td>{order.email}</td>
-            <td>${order.invoiceAmount}</td>
             <td>{order.status}</td>
             <td>{order.date}</td>
             <td>

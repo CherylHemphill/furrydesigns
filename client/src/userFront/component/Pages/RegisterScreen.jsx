@@ -97,7 +97,7 @@ function RegisterScreen(props) {
                     </div> */}
                     <button
                         type="submit"
-                        className="mt-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-500 focus:ring-offset-2"
+                        className="w-1/3 bg-darkBlue hover:bg-teal text-white py-2 rounded shadow-md"
                     >
                         Register
                     </button>
@@ -107,7 +107,7 @@ function RegisterScreen(props) {
                         Already have an account?{' '}
                         <Link
                             to="/login"
-                            className="font-medium text-blue-600 hover:text-blue-500"
+                            className="text-burntOrange hover:text-teal"
                         >
                             Login
                         </Link>
